@@ -54,13 +54,13 @@
             display: flex;
         }
         .cell {
-            width: 40px;
-            height: 40px;
+            width: 60px;
+            height: 60px;
             border: 1px solid #4b5563;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
+            font-size: 30px;
             font-weight: bold;
         }
         .path {
@@ -71,7 +71,7 @@
         }
         .exit {
             background-color: #10b981;
-            font-size: 10px;
+            font-size: 12px;
             color: white;
         }
         .player {
@@ -108,10 +108,10 @@
     <p class="instruction">点击方向按钮移动红色 X 到达右下角绿色出口</p>
     
     <div class="controls">
-        <button onclick="movePlayer('up')">上</button>
-        <button onclick="movePlayer('down')">下</button>
-        <button onclick="movePlayer('left')">左</button>
-        <button onclick="movePlayer('right')">右</button>
+        <button onclick="movePlayer('up')">Up</button>
+        <button onclick="movePlayer('down')">Down</button>
+        <button onclick="movePlayer('left')">Left</button>
+        <button onclick="movePlayer('right')">Right</button>
     </div>
     
     <div class="maze" id="mazeContainer"></div>
@@ -123,33 +123,28 @@
 
     <script>
         var maze = [
-            [0, 1, 0, 0, 0, 0, 1, 0, 0, 0],
-            [0, 1, 0, 1, 1, 0, 1, 0, 1, 0],
-            [0, 0, 0, 0, 1, 0, 0, 0, 1, 0],
-            [0, 1, 1, 0, 1, 1, 1, 0, 1, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
-            [1, 1, 1, 0, 1, 1, 1, 0, 1, 0],
-            [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-            [0, 1, 1, 1, 1, 0, 1, 1, 1, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
-            [1, 1, 1, 1, 1, 1, 1, 0, 0, 0]
+            [0, 1, 0, 0, 0],
+            [0, 1, 0, 1, 0],
+            [0, 0, 0, 1, 0],
+            [0, 1, 0, 0, 0],
+            [0, 0, 0, 1, 0]
         ];
         
         var playerX = 0;
         var playerY = 0;
         var gameWon = false;
-        var exitX = 9;
-        var exitY = 9;
+        var exitX = 4;
+        var exitY = 4;
         
         function createMaze() {
             var container = document.getElementById('mazeContainer');
             container.innerHTML = '';
             
-            for (var y = 0; y < 10; y++) {
+            for (var y = 0; y < 5; y++) {
                 var rowDiv = document.createElement('div');
                 rowDiv.className = 'maze-row';
                 
-                for (var x = 0; x < 10; x++) {
+                for (var x = 0; x < 5; x++) {
                     var cellDiv = document.createElement('div');
                     cellDiv.className = 'cell';
                     cellDiv.id = 'c' + x + 'y' + y;
@@ -205,8 +200,8 @@
                 }
             } else if (direction === 'down') {
                 newY = newY + 1;
-                if (newY > 9) {
-                    newY = 9;
+                if (newY > 4) {
+                    newY = 4;
                 }
             } else if (direction === 'left') {
                 newX = newX - 1;
@@ -215,8 +210,8 @@
                 }
             } else if (direction === 'right') {
                 newX = newX + 1;
-                if (newX > 9) {
-                    newX = 9;
+                if (newX > 4) {
+                    newX = 4;
                 }
             }
             
