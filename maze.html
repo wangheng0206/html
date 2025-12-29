@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>迷宫游戏</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #1a1a2e;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        .instruction {
+            color: #d1d5db;
+            margin-bottom: 20px;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .controls button {
+            padding: 15px 25px;
+            font-size: 18px;
+            font-weight: bold;
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .controls button:hover {
+            background-color: #2563eb;
+        }
+        .maze {
+            border: 3px solid #4b5563;
+            background-color: #374151;
+            padding: 5px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .maze-row {
+            display: flex;
+        }
+        .cell {
+            width: 40px;
+            height: 40px;
+            border: 1px solid #4b5563;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .path {
+            background-color: #f3f4f6;
+        }
+        .wall {
+            background-color: #1f2937;
+        }
+        .exit {
+            background-color: #10b981;
+            font-size: 10px;
+            color: white;
+        }
+        .player {
+            color: #dc2626;
+        }
+        .win-message {
+            text-align: center;
+            display: none;
+        }
+        .win-message.show {
+            display: block;
+        }
+        .win-message h2 {
+            font-size: 2em;
+            color: #10b981;
+            margin-bottom: 15px;
+        }
+        .reset-btn {
+            padding: 12px 30px;
+            font-size: 16px;
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .reset-btn:hover {
+            background-color: #2563eb;
+        }
+    </style>
+</head>
+<body>
+    <h1>迷宫游戏</h1>
+    <p class="instruction">点击方向按钮移动红色 X 到达右下角绿色出口</p>
+    
+    <div class="controls">
+        <button onclick="movePlayer('up')">上</button>
+        <button onclick="movePlayer('down')">下</button>
+        <button onclick="movePlayer('left')">左</button>
+        <button onclick="movePlayer('right')">右</button>
+    </div>
+    
+    <div class="maze" id="mazeContainer"></div>
+    
+    <div class="win-message" id="winMessage">
+        <h2>恭喜你成功了!</h2>
+        <button class="reset-btn" onclick="resetGame()">重新开始</button>
+    </div>
+
+    <script>
+        var maze = [
+            [0, 1, 0, 0, 0, 0, 1, 0, 0, 0],
+            [0, 1, 0, 1, 1, 0, 1, 0, 1, 0],
+            [0, 0, 0, 0, 1, 0, 0, 0, 1, 0],
+            [0, 1, 1, 0, 1, 1, 1, 0, 1, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+            [1, 1, 1, 0, 1, 1, 1, 0, 1, 0],
+            [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+            [0, 1, 1, 1, 1, 0, 1, 1, 1, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+            [1, 1, 1, 1, 1, 1, 1, 0, 0, 0]
+        ];
+        
+        var playerX = 0;
+        var playerY = 0;
+        var gameWon = false;
+        var exitX = 9;
+        var exitY = 9;
+        
+        function createMaze() {
+            var container = document.getElementById('mazeContainer');
+            container.innerHTML = '';
+            
+            for (var y = 0; y < 10; y++) {
+                var rowDiv = document.createElement('div');
+                rowDiv.className = 'maze-row';
+                
+                for (var x = 0; x < 10; x++) {
+                    var cellDiv = document.createElement('div');
+                    cellDiv.className = 'cell';
+                    cellDiv.id = 'c' + x + 'y' + y;
+                    
+                    if (maze[y][x] === 1) {
+                        cellDiv.className = cellDiv.className + ' wall';
+                    } else {
+                        cellDiv.className = cellDiv.className + ' path';
+                    }
+                    
+                    if (x === exitX && y === exitY) {
+                        cellDiv.className = cellDiv.className + ' exit';
+                        cellDiv.textContent = 'EXIT';
+                    }
+                    
+                    rowDiv.appendChild(cellDiv);
+                }
+                
+                container.appendChild(rowDiv);
+            }
+            
+            drawPlayer();
+        }
+        
+        function drawPlayer() {
+            var allCells = document.querySelectorAll('.cell');
+            for (var i = 0; i < allCells.length; i++) {
+                var spans = allCells[i].querySelectorAll('.player');
+                for (var j = 0; j < spans.length; j++) {
+                    allCells[i].removeChild(spans[j]);
+                }
+            }
+            
+            var currentCell = document.getElementById('c' + playerX + 'y' + playerY);
+            var playerSpan = document.createElement('span');
+            playerSpan.className = 'player';
+            playerSpan.textContent = 'X';
+            currentCell.appendChild(playerSpan);
+        }
+        
+        function movePlayer(direction) {
+            if (gameWon) {
+                return;
+            }
+            
+            var newX = playerX;
+            var newY = playerY;
+            
+            if (direction === 'up') {
+                newY = newY - 1;
+                if (newY < 0) {
+                    newY = 0;
+                }
+            } else if (direction === 'down') {
+                newY = newY + 1;
+                if (newY > 9) {
+                    newY = 9;
+                }
+            } else if (direction === 'left') {
+                newX = newX - 1;
+                if (newX < 0) {
+                    newX = 0;
+                }
+            } else if (direction === 'right') {
+                newX = newX + 1;
+                if (newX > 9) {
+                    newX = 9;
+                }
+            }
+            
+            if (maze[newY][newX] === 0) {
+                playerX = newX;
+                playerY = newY;
+                drawPlayer();
+                
+                if (playerX === exitX && playerY === exitY) {
+                    gameWon = true;
+                    document.getElementById('winMessage').className = 'win-message show';
+                }
+            }
+        }
+        
+        function resetGame() {
+            playerX = 0;
+            playerY = 0;
+            gameWon = false;
+            document.getElementById('winMessage').className = 'win-message';
+            drawPlayer();
+        }
+        
+        createMaze();
+    </script>
+</body>
+</html>
